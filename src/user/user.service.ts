@@ -3,10 +3,21 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { UUID } from 'crypto';
 import { UpdatePutDTO } from './dto/update-put-user.dto';
 import { UpdatePatchUserDTO } from './dto/update-patch-user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  async create(data: CreateUserDTO) {}
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create({email, name, password}: CreateUserDTO) {
+    return this.prisma.user.create({
+      data: {
+        email,
+        name,
+        password,
+      }
+    })
+  }
 
   async list() {}
 
