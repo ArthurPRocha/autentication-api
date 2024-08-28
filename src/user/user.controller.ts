@@ -10,6 +10,8 @@ import {
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { ParamId } from 'src/decorators/param-id.decorator';
+import { UpdatePatchUserDTO } from './dto/update-patch-user.dto';
+import { UpdatePutUserDTO } from './dto/update-put-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -17,7 +19,7 @@ export class UserController {
 
   @Post()
   async create(@Body() data: CreateUserDTO) {
-    return this.userService.create(data)
+    return this.userService.create(data);
   }
 
   @Get()
@@ -27,17 +29,17 @@ export class UserController {
 
   @Get(':id')
   async show(@ParamId() id: string) {
-    return this.userService.show(id)
+    return this.userService.show(id);
   }
 
   @Put(':id')
-  async update(@Body() body, @ParamId() id: string) {
-    return this.userService.update(body, id);
+  async update(@Body() body: UpdatePutUserDTO, @ParamId() id: string) {
+    return this.userService.update(id, body);
   }
 
   @Patch(':id')
-  async updatePartial(@Body() body, @ParamId() id: string) {
-    return this.userService.updatePartial(body, id);
+  async updatePartial(@Body() body: UpdatePatchUserDTO, @ParamId() id: string) {
+    return this.userService.updatePartial(id, body);
   }
 
   @Delete(':id')
