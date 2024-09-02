@@ -54,3 +54,7 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Misc
+
+nifty-edge-433323-m9-816cecbc91aa.json

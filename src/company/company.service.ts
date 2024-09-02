@@ -3,18 +3,22 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdatePutCompanyDTO } from './dto/update-put-company.dto';
-import { CreateCompanyDTO } from './dto/create-company.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdatePatchCompanyDTO } from './dto/update-patch-company.dto';
+import { FileService } from 'src/file/file.service';
 
 @Injectable()
 export class CompanyService {
-  constructor(private readonly prisma: PrismaService) {}
-  async create({ name, logoUrl, fileName }: CreateCompanyDTO) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly fileService: FileService,
+  ) {}
+
+  async create(name: string, file: Express.Multer.File) {
     try {
+      const dataFile = await this.fileService.uploadFileGc(file);
+
       return this.prisma.company.create({
-        data: { name, logoUrl, fileName },
+        data: { name, logoUrl: dataFile.url, fileName: dataFile.originalName },
       });
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -33,45 +37,72 @@ export class CompanyService {
     });
   }
 
-  async update(id: string, { name, logoUrl, fileName }: UpdatePutCompanyDTO) {
-    await this.exists(id);
-
-    return this.prisma.company.update({
-      data: {
-        name,
-        logoUrl,
-        fileName,
-      },
-      where: {
-        id,
-      },
-    });
+  async update(id: string, name: string, file: Express.Multer.File) {
+    try {
+      await this.exists(id);
+      const dataFile = await this.fileService.uploadFileGc(file);
+      return this.prisma.company.update({
+        data: {
+          name,
+          logoUrl: dataFile.url,
+          fileName: dataFile.originalName,
+        },
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  async updatePartial(
-    id: string,
-    { name, logoUrl, fileName }: UpdatePatchCompanyDTO,
-  ) {
-    await this.exists(id);
-    const data: any = {};
+  async updatePartial(id: string, name: string, file: Express.Multer.File) {
+    try {
+      await this.exists(id);
+      const data: any = {};
 
-    if (name) {
-      data.name = name;
-    }
+      if (name && file) {
+        const dataFile = await this.fileService.uploadFileGc(file);
 
-    if (logoUrl) {
-      data.logoUrl = logoUrl;
-    }
+        return this.prisma.company.update({
+          data: {
+            name,
+            fileName: dataFile.originalName,
+            logoUrl: dataFile.url,
+          },
+          where: {
+            id,
+          },
+        });
+      }
 
-    if (fileName) {
-      data.fileName = fileName;
+      if (name) {
+        return this.prisma.company.update({
+          data: {
+            name,
+          },
+          where: {
+            id,
+          },
+        });
+      }
+
+      if (file) {
+        const dataFile = await this.fileService.uploadFileGc(file);
+
+        return this.prisma.company.update({
+          data: {
+            fileName: dataFile.originalName,
+            logoUrl: dataFile.url,
+          },
+          where: {
+            id,
+          },
+        });
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-    return this.prisma.company.update({
-      data,
-      where: {
-        id,
-      },
-    });
   }
 
   async delete(id: string) {

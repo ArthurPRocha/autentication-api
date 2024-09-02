@@ -5,8 +5,5 @@ export class CreateCompanyDTO {
   @MaxLength(20)
   name: string;
 
-  @IsUrl()
-  logoUrl: string;
-
-  fileName: string;
+  file: Express.Multer.File;
 }
