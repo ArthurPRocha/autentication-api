@@ -36,6 +36,18 @@ export class AuthService {
     };
   }
 
+  checkToken(token: string) {
+    try {
+      const data = this.jwtService.verify(token, {
+        audience: 'users',
+        issuer: 'login',
+      });
+      return data;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
   async login(email: string, password: string) {
     const user = await this.prisma.user.findFirst({
       where: {
