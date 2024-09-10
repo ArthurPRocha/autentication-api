@@ -6,13 +6,19 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { ParamId } from 'src/decorators/param-id.decorator';
 import { UpdatePatchUserDTO } from './dto/update-patch-user.dto';
 import { UpdatePutUserDTO } from './dto/update-put-user.dto';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { RoleGuard } from 'src/guards/role.guard';
+import { Role } from 'src/decorators/role.decorator';
 
+@UseGuards(AuthGuard, RoleGuard)
+@Role('Admin')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

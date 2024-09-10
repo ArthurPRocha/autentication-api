@@ -13,7 +13,7 @@ import { UpdatePutUserDTO } from './dto/update-put-user.dto';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create({ email, name, password, companyId }: CreateUserDTO) {
+  async create({ email, name, password, companyId, roleId }: CreateUserDTO) {
     try {
       const userExist = await this.prisma.user.count({
         where: { email },
@@ -22,6 +22,9 @@ export class UserService {
       if (userExist) {
         throw new BadRequestException('Usuário já existe.');
       }
+
+      if (!roleId) roleId = 2;
+
       const hashPassword = await bcrypt.hash(password, 10);
 
       return this.prisma.user.create({
@@ -30,6 +33,7 @@ export class UserService {
           password: hashPassword,
           name,
           companyId,
+          roleId,
         },
       });
     } catch (error) {
@@ -49,13 +53,16 @@ export class UserService {
     });
   }
 
-  async update(id: string, { email, password, name }: UpdatePutUserDTO) {
+  async update(
+    id: string,
+    { email, password, name, roleId }: UpdatePutUserDTO,
+  ) {
     await this.exists(id);
 
     const hashPassword = await bcrypt.hash(password, 10);
 
     return this.prisma.user.update({
-      data: { email, password: hashPassword, name },
+      data: { email, password: hashPassword, name, roleId },
       where: {
         id,
       },
@@ -64,7 +71,7 @@ export class UserService {
 
   async updatePartial(
     id: string,
-    { email, name, password }: UpdatePatchUserDTO,
+    { email, name, password, roleId }: UpdatePatchUserDTO,
   ) {
     await this.exists(id);
     const data: any = {};
@@ -80,6 +87,10 @@ export class UserService {
     if (password) {
       const hashPassword = await bcrypt.hash(password, 10);
       data.password = hashPassword;
+    }
+
+    if (roleId) {
+      data.roleId = roleId;
     }
 
     return this.prisma.user.update({

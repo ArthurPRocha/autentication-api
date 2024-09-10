@@ -20,6 +20,8 @@ model User {
   password        String
   oneTimePassword String?
   answer          String?
+  roleId          Int 
+  role            Role    @relation(fields: [roleId], references: [id])
 
   createdBy        String?
   createdAt        DateTime        @default(now())
@@ -86,6 +88,8 @@ model Role {
   name String
 
   status Boolean @default(true)
+
+  User User[]
 
   @@map("tb_roles")
 }
